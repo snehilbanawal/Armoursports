@@ -15,15 +15,16 @@ from django.views.decorators.csrf import csrf_exempt
 
 def payments(request):
     body = json.loads(request.body)
-    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
+    order = Order.objects.get(
+        user=request.user, is_ordered=False, order_number=body['orderID'])
 
     # Store transaction details inside Payment model
     payment = Payment(
-        user = request.user,
-        payment_id = body['transID'],
-        payment_method = body['payment_method'],
-        amount_paid = order.order_total,
-        status = body['status'],
+        user=request.user,
+        payment_id=body['transID'],
+        payment_method=body['payment_method'],
+        amount_paid=order.order_total,
+        status=body['status'],
     )
     payment.save()
 
@@ -50,7 +51,6 @@ def payments(request):
         orderproduct = OrderProduct.objects.get(id=orderproduct.id)
         orderproduct.variations.set(product_variation)
         orderproduct.save()
-
 
         # Reduce the quantity of the sold products
         product = Product.objects.get(id=item.product_id)
@@ -81,13 +81,15 @@ def payments(request):
 def razorpaypayment(request):
     if request.method == "POST":
         name = request.POST.get('name')
-        amount=request.POST.get('grandtotal')*100
-        client = razorpay.Client(auth=("rzp_test_9xlmFAN6eGV6bq", "5ctCHakT1Q3kMx4MwRfCrVAt"))
+        amount = request.POST.get('grandtotal')*100
+        client = razorpay.Client(
+            auth=("rzp_test_9Ns6flF5I1Axat", "9s1wig6PT0wUnzom7px7X5hL"))
 
-        data = { "amount": amount, "currency": "INR", "payment_capture": "1" }
+        data = {"amount": amount, "currency": "INR", "payment_capture": "1"}
         payment = client.order.create(data=data)
 
     return render(request, 'payments.html')
+
 
 @csrf_exempt
 def success(request):
@@ -110,7 +112,7 @@ def place_order(request, total=0, quantity=0,):
         quantity += cart_item.quantity
     tax = (2 * total)/100
     grand_total = total + tax
-
+    grand_total_rzp = int(grand_total*100)
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -135,19 +137,21 @@ def place_order(request, total=0, quantity=0,):
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr,mt,dt)
-            current_date = d.strftime("%Y%m%d") #20210305
+            d = datetime.date(yr, mt, dt)
+            current_date = d.strftime("%Y%m%d")  # 20210305
             order_number = current_date + str(data.id)
             data.order_number = order_number
             data.save()
 
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            order = Order.objects.get(
+                user=current_user, is_ordered=False, order_number=order_number)
             context = {
                 'order': order,
                 'cart_items': cart_items,
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
+                'grand_total_rzp': grand_total_rzp,
             }
             return render(request, 'orders/payments.html', context)
     else:
