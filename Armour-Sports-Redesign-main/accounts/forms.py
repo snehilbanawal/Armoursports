@@ -1,5 +1,6 @@
 from django import forms
 from .models import Account
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
 class RegistrationForm(forms.ModelForm):
@@ -13,7 +14,8 @@ class RegistrationForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name', 'phone_number', 'email', 'password']
+        fields = ['first_name', 'last_name',
+                  'phone_number', 'email', 'password']
 
     def clean(self):
         cleaned_data = super(RegistrationForm, self).clean()
@@ -33,3 +35,16 @@ class RegistrationForm(forms.ModelForm):
         self.fields['email'].widget.attrs['placeholder'] = 'Enter Email Address'
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'
+
+
+class EditProfileForm(UserChangeForm):
+    template_name = '/something/else'
+
+    class Meta:
+        model = Account
+        fields = (
+            'email',
+            'first_name',
+            'last_name',
+
+        )

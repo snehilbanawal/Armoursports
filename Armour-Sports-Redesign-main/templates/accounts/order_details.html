@@ -2,10 +2,9 @@
 <!--  -->
 {%block main%}
 <!--  -->
-{%for order in orders%}
 <article class="card">
     <header class="card-header">
-        <p class="d-inline-block mr-3">Order ID: <a href='/accounts/orders/{{order.id}}/'>{{order.id}}</a></p>
+        <p class="d-inline-block mr-3">Order ID: {{order.id}}</p>
         <span>Order Date: {{order.created_at}}</span>
     </header>
     <div class="card-body">
@@ -32,10 +31,10 @@
     <!-- card-body .// -->
     <div class="table-responsive">
         <!-- We can run a for loop for ordered items-->
-        {%for item in order.products%}
+        {%for item in products%}
         <div class="row">
             <div class="col-2 product-image">
-                <img src="{{item.product.images}}" class="border" style="height: 80px; width: 80px; object-fit: cover">
+                <img src="{{item.product.images.url}}" class="border" style="height: 80px; width: 80px; object-fit: cover">
             </div>
             <div class="col-6 d-flex justify-content-center flex-column">
                 <p class="product-name">{{item.product.product_name}}</p>
@@ -51,4 +50,12 @@
     </div>
     <!-- table-responsive .end// -->
 </article>
-{%endfor%} {%endblock%}
+<!-- order-group.// -->
+</main>
+</div>
+<!-- row.// -->
+</div>
+
+
+</section>
+{%endblock%}

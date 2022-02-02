@@ -2,10 +2,10 @@
 <!--  -->
 {%block main%}
 <!--  -->
-{%for order in orders%}
+{%for payment in payments%}
 <article class="card">
     <header class="card-header">
-        <p class="d-inline-block mr-3">Order ID: <a href='/accounts/orders/{{order.id}}/'>{{order.id}}</a></p>
+        <p class="d-inline-block mr-3">Order ID: <a href='/accounts/orders/{{payment.order_id}}/'>{{payment.order_id}}</a></p>
         <span>Order Date: {{order.created_at}}</span>
     </header>
     <div class="card-body">

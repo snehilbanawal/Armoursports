@@ -19,17 +19,17 @@
     </a> {%else%}
     <a class="list-group-item " href="/accounts/myprofile/ "> 
         My Profile 
-    </a> {%endifequal%}{%ifequal request.path '/accounts/editprofile/'%}
-    <a class="list-group-item active " href="/accounts/editprofile/ "> 
+    </a> {%endifequal%}{%ifequal request.path '/accounts/useredit/'%}
+    <a class="list-group-item active " href="/accounts/useredit/ "> 
         Edit Profile
     </a> {%else%}
-    <a class="list-group-item " href="/accounts/editprofile/ "> 
+    <a class="list-group-item " href="/accounts/useredit/ "> 
         Edit Profile
-    </a> {%endifequal%} {%ifequal request.path '/accounts/myitems/'%}
-    <a class="list-group-item active " href="/accounts/myitems/ "> 
-        My Items 
+    </a> {%endifequal%} {%ifequal request.path '/accounts/password/'%}
+    <a class="list-group-item active " href="/accounts/password/ "> 
+        Change Password
     </a> {%else%}
-    <a class="list-group-item " href="/accounts/myitems/ "> 
-        My Items 
+    <a class="list-group-item " href="/accounts/password/ "> 
+        Change Password
     </a> {%endifequal%}
 </ul>

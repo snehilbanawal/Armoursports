@@ -3,6 +3,8 @@ from .forms import RegistrationForm
 from .models import Account
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+
 from django.http import HttpResponse
 
 # Verification email
@@ -15,8 +17,12 @@ from django.core.mail import EmailMessage
 
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
+from accounts.forms import (
+    EditProfileForm
+)
 
-from orders.models import Order, OrderProduct
+from django.contrib.auth.forms import PasswordChangeForm
+from orders.models import Order, OrderProduct, Payment
 
 import requests
 
@@ -177,8 +183,22 @@ def myorders(request):
 
 
 @login_required(login_url='login')
-def editprofile(request):
-    return render(request, 'accounts/userprofile_edit.html')
+def mypayments(request):
+    payments = Payment.objects.filter(user=request.user)
+    return render(request, 'accounts/mypayments.html', {'payments': payments})
+
+
+def edit_profile(request):
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = EditProfileForm(instance=request.user)
+        args = {'form': form}
+        return render(request, 'accounts/edit_profile.html', args)
 
 
 def forgotPassword(request):
@@ -242,3 +262,31 @@ def resetPassword(request):
             return redirect('resetPassword')
     else:
         return render(request, 'accounts/resetPassword.html')
+
+
+@login_required(login_url='login')
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(data=request.POST, user=request.user)
+
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect('dashboard')
+        else:
+            return redirect('accounts/change_password.html')
+    else:
+        form = PasswordChangeForm(user=request.user)
+
+        args = {'form': form}
+        return render(request, 'accounts/change_password.html', args)
+
+
+@login_required(login_url='login')
+def order_details(request, id):
+    ord = Order.objects.get(id=id)
+    prod = OrderProduct.objects.filter(order=ord)
+    if(ord.user == request.user):
+        return render(request, 'accounts/order_details.html', {'order': ord, 'products': prod})
+    else:
+        return redirect('/accounts/')
