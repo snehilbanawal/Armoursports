@@ -16,10 +16,14 @@ from django.core.mail import EmailMessage
 from carts.views import _cart_id
 from carts.models import Cart, CartItem
 
+from orders.models import Order, OrderProduct
+
 import requests
 
 
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('/accounts/')
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -57,6 +61,8 @@ def register(request):
 
 
 def login(request):
+    if request.user.is_authenticated:
+        return redirect('/accounts/')
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
@@ -150,6 +156,29 @@ def activate(request, uidb64, token):
 @login_required(login_url='login')
 def dashboard(request):
     return render(request, 'accounts/dashboard.html')
+
+
+@login_required(login_url='login')
+def userprofile(request):
+    return render(request, 'accounts/userprofile.html')
+
+
+@login_required(login_url='login')
+def myorders(request):
+    ord = Order.objects.filter(user=request.user)
+    orders = {}
+    for i in ord:
+        orders[i] = {
+            'order': i,
+            'products': OrderProduct.objects.filter(order=i)
+        }
+    print(orders)
+    return render(request, 'accounts/myorders.html', {'orders': orders})
+
+
+@login_required(login_url='login')
+def editprofile(request):
+    return render(request, 'accounts/userprofile_edit.html')
 
 
 def forgotPassword(request):

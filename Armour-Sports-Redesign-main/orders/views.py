@@ -15,17 +15,21 @@ from django.views.decorators.csrf import csrf_exempt
 
 def payments(request):
     body = json.loads(request.body)
+    print(body)
     order = Order.objects.get(
         user=request.user, is_ordered=False, order_number=body['orderID'])
-
     # Store transaction details inside Payment model
+    try:
+        signature = body['signature']
+    except(KeyError):
+        signature = 'nosignature',
     payment = Payment(
         user=request.user,
         payment_id=body['transID'],
-        payment_method=body['payment_method'],
         amount_paid=order.order_total,
-        status=body['status'],
+        signature=signature
     )
+    print("INVOKED BIATHC")
     payment.save()
 
     order.payment = payment
@@ -61,14 +65,14 @@ def payments(request):
     CartItem.objects.filter(user=request.user).delete()
 
     # Send order recieved email to customer
-    mail_subject = 'Thank you for your order!'
-    message = render_to_string('orders/order_recieved_email.html', {
-        'user': request.user,
-        'order': order,
-    })
-    to_email = request.user.email
-    send_email = EmailMessage(mail_subject, message, to=[to_email])
-    send_email.send()
+    # mail_subject = 'Thank you for your order!'
+    # message = render_to_string('orders/order_recieved_email.html', {
+    #     'user': request.user,
+    #     'order': order,
+    # })
+    # to_email = request.user.email
+    # send_email = EmailMessage(mail_subject, message, to=[to_email])
+    # send_email.send()
 
     # Send order number and transaction id back to sendData method via JsonResponse
     data = {
@@ -145,6 +149,13 @@ def place_order(request, total=0, quantity=0,):
 
             order = Order.objects.get(
                 user=current_user, is_ordered=False, order_number=order_number)
+
+            amount = grand_total_rzp
+            client = razorpay.Client(
+                auth=("rzp_test_9Ns6flF5I1Axat", "9s1wig6PT0wUnzom7px7X5hL"))
+
+            data = {"amount": amount, "currency": "INR", "payment_capture": "1"}
+            payment = client.order.create(data=data)
             context = {
                 'order': order,
                 'cart_items': cart_items,
@@ -152,12 +163,14 @@ def place_order(request, total=0, quantity=0,):
                 'tax': tax,
                 'grand_total': grand_total,
                 'grand_total_rzp': grand_total_rzp,
+                'payment': payment
             }
             return render(request, 'orders/payments.html', context)
     else:
         return redirect('checkout')
 
 
+@csrf_exempt
 def order_complete(request):
     order_number = request.GET.get('order_number')
     transID = request.GET.get('payment_id')
